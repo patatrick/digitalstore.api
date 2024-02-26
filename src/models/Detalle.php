@@ -8,5 +8,6 @@ class Detalle
 	public string $nombre = "";
 	public int $cant = 0;
 	public int $precio = 0;
+	public int $precio_un = 0;
 	public bool $mayorista = false;
 }

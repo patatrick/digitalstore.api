@@ -2,6 +2,6 @@
 namespace App\Models;
 class Rol
 {
-	public ?int $id = null;
-	public ?string $nombre = null;
+	public ?string $id;
+	public ?string $nombre;
 }

@@ -4,7 +4,6 @@ class UsuarioTienda
 {
     public int $id_usuarios;
     public int $id_tienda;
-
-    /** @var Tienda[] */
-    public array $tienda = [];
+    public int $id_rol;
+    public int $estado;
 }

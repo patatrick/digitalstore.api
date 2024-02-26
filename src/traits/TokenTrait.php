@@ -3,19 +3,23 @@ namespace App\Traits;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use const App\TK_KEY;
-use const App\TK_EXP;
+use App\Config;
 trait TokenTrait
 {
+    private function Config() : Config
+    {
+        $config = new Config();
+        return $config;
+    }
 	public function GenerateJWT($playLoad) : string
 	{
 		try
 		{
-			$playLoad["exp"] = time() + TK_EXP;
-			return JWT::encode($playLoad, TK_KEY, "HS256");
+			$playLoad["exp"] = time() + $this->Config()->token["exp"];
+			return JWT::encode($playLoad, $this->Config()->token["key"], "HS256");
 		}
 		catch (\Throwable $th) {
-			echo "className " . $th->getMessage()." in line ".$th->getLine();
+			echo "TokenTrait " . $th->getMessage()." in line ".$th->getLine();
 			http_response_code(500);
 			die();
 		}
@@ -27,7 +31,7 @@ trait TokenTrait
 			if (!$token) {
 				return false;
 			}
-			return JWT::decode($token, new Key(TK_KEY, 'HS256'));
+			return JWT::decode($token, new Key($this->Config()->token["key"], 'HS256'));
 		}
 		catch (\Firebase\JWT\ExpiredException $e) {
 			// Manejar la excepción de token expirado
@@ -49,10 +53,30 @@ trait TokenTrait
 		$playload = $this->DecodeJWT($token);
 		return $playload->id_usuario;
 	}
-	public function getRolId(Request $request) : int
+	/** @return \App\Models\TiendaDTO */
+	public function getTienda(Request $request, int $id_tienda)
 	{
 		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
 		$playload = $this->DecodeJWT($token);
-		return $playload->id_rol;
+		$tienda = null;
+		foreach ($playload->tienda as $value) {
+
+			if ($value->id == $id_tienda) {
+				$tienda = $value; 
+			}
+		}
+		return $tienda;
+	}
+	public function getRol(Request $request, int $id_tienda) : int
+	{
+		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
+		$playload = $this->DecodeJWT($token);
+		$tienda = null;
+		foreach ($playload->tienda as $value) {
+			if ($value->id == $id_tienda) {
+				$tienda = $value; 
+			}
+		}
+		return $tienda->id_rol;
 	}
 }

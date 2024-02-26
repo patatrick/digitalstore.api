@@ -1,13 +1,9 @@
 <?php
-use App\Controllers\InformeController;
-use App\Controllers\InventarioController;
-use App\Controllers\VentaController;
-require __DIR__ . "/vendor/autoload.php";
-require_once __DIR__."./src/Constantes.php";
-
 ini_set('display_errors', 1);
 error_reporting(-1);
 date_default_timezone_set('America/Santiago');
+
+require __DIR__ . "/vendor/autoload.php";
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -17,53 +13,80 @@ header('Access-Control-Max-Age: 86400');
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
 use Slim\Factory\AppFactory;
-use App\Middlewares\AuthMiddleware;
 use Slim\Routing\RouteCollectorProxy;
+
+use App\Middlewares\AuthMiddleware;
+use App\Middlewares\CustomCorsMiddleware;
+use App\Middlewares\AdministradorMiddleware;
+use App\Middlewares\AdministradorOrJefeMiddleware;
 
 use App\Controllers\LoginController;
 use App\Controllers\MenuController;
 use App\Controllers\ProductoController;
+use App\Controllers\InformeController;
+use App\Controllers\InventarioController;
+use App\Controllers\ProveedorController;
+use App\Controllers\VentaController;
+use App\Controllers\UsuarioController;
 
 $app = AppFactory::create();
 $app->setBasePath("/tienda.biotecnochile.api");
 $app->addErrorMiddleware(true, true, true);
+// $app->addErrorMiddleware(false, false, false);
 $app->addBodyParsingMiddleware();
+$app->add(new CustomCorsMiddleware());
+
 
 // Routes
 
+// $app->get('/hello', [HelloController::class, "Index"]);
+
 $app->post('/login', [LoginController::class, "Index"]);
-
-$app->get('/menu', [MenuController::class, "Index"])->add(new AuthMiddleware);
-
+$app->get('/menu/tienda/{id_tienda}', [MenuController::class, "Index"])->add(new AuthMiddleware);
 $app->group('/producto', function (RouteCollectorProxy $group)
 {
     $group->get('/tienda/{id_tienda}/sku/{sku}', [ProductoController::class, "Index"]);
     $group->get('/inventario/tienda/{id_tienda}/sku/{sku}', [ProductoController::class, "TraerProductoInventario"]);
     $group->get('/tienda/{id_tienda}/generar-sku-interno', [ProductoController::class, "TraerSku"]);
-    $group->post('/', [ProductoController::class, "Insertar"]);
-    $group->put('/', [ProductoController::class, "Actualizar"]);
+    $group->post('/tienda/{id_tienda}', [ProductoController::class, "Insertar"]);
+    $group->put('/tienda/{id_tienda}', [ProductoController::class, "Actualizar"]);
     $group->delete('/tienda/{id_tienda}/inventario/{id_inventario}', [ProductoController::class, "Eliminar"]);
-})
-->add(new AuthMiddleware);
+})->add(new AuthMiddleware);
 
 $app->group('/inventario', function (RouteCollectorProxy $group)
 {
     $group->get('/tienda/{id_tienda}', [InventarioController::class, "Index"]);
-})
-->add(new AuthMiddleware);
+})->add(new AuthMiddleware);
 
 $app->group('/venta', function (RouteCollectorProxy $group)
 {
-    $group->post('', [VentaController::class, "Insertar"]);
-})
-->add(new AuthMiddleware);
+    $group->post('/tienda/{id_tienda}', [VentaController::class, "Insertar"]);
+})->add(new AuthMiddleware);
 
 $app->group('/informe', function (RouteCollectorProxy $group)
 {
     $group->get('/venta/tienda/{id_tienda}/tipo/{tipo}', [InformeController::class, "ObtenerVentas"]);
+})->add(new AuthMiddleware);
+
+$app->group('/usuario', function (RouteCollectorProxy $group)
+{
+    $group->get('/tienda/{id_tienda}', [UsuarioController::class, "GetAll"]);
+    $group->get('{id_usuario}/tienda/{id_tienda}', [UsuarioController::class, "GetOneByTienda"]);
+    $group->post('/rol/{id_rol}/tienda/{id_tienda}', [UsuarioController::class, "Insert"])->add(new AdministradorOrJefeMiddleware);
+    $group->put('/tienda/{id_tienda}', [UsuarioController::class, "Update"])->add(new AdministradorOrJefeMiddleware);
+    $group->put('/{id_usuario}/rol/{id_rol}/tienda/{id_tienda}', [UsuarioController::class, "UpdateRol"])->add(new AdministradorOrJefeMiddleware);
+    $group->delete('/{id_usuario}/estado/{id_estado}/tienda/{id_tienda}', [UsuarioController::class, "Delete"])->add(new AdministradorOrJefeMiddleware);
+})->add(new AuthMiddleware);
+
+
+
+
+// Sólo administradores
+$app->group('/proveedor', function (RouteCollectorProxy $group)
+{
+    $group->get('/tienda/{id_tienda}', [ProveedorController::class, "GetAll"]);
+    $group->post('/tienda/{id_tienda}', [ProveedorController::class, "Insert"]);
 })
-->add(new AuthMiddleware);
-
-
+->add(new AuthMiddleware)->add(new AdministradorMiddleware);
 
 $app->run();

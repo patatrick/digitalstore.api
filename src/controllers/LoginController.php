@@ -4,7 +4,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Services\LoginService;
 use App\Traits\TokenTrait;
-use const App\HASH_SEMILLA;
+use App\Config;
 
 class LoginController
 {
@@ -21,18 +21,21 @@ class LoginController
 				$response->getBody()->write("Campos en blanco");
 				return $response->withStatus(400);
 			}
-			$psw = hash('sha256', $psw . HASH_SEMILLA);
+            $config = new Config();
+			$psw = hash('sha256', $psw . $config->hash_semilla);
 			$login = new LoginService();
 			$userData = $login->Index($ci, $psw);
 			if (!$userData) {
 				$response->getBody()->write("Usuario o contraseña incorrecta");
 				return $response->withStatus(400);
 			}
-
-			$playload = $this->GetPlayload($userData->Usuario->id, $userData->Usuario->id_rol);
+			$session = [
+				"id_usuario" => $userData->Usuario->id,
+				"tienda" => $userData->Tienda
+			];
 			$response->getBody()->write(json_encode([
 				"data" => $userData,
-				"token" => $this->GenerateJWT($playload)
+				"token" => $this->GenerateJWT($session)
 			]));
 			return $response;
 		}
@@ -40,12 +43,5 @@ class LoginController
 			$response->getBody()->write($th->getMessage()." in line ".$th->getLine());
 			return $response->withStatus(500);
 		}
-	}
-	private function GetPlayload($idUsuario, $idRol) : array
-	{
-		return [
-			"id_usuario" => $idUsuario,
-			"id_rol" => $idRol
-		];
 	}
 }

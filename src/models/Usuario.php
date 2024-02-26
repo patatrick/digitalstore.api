@@ -2,13 +2,12 @@
 namespace App\Models;
 class Usuario 
 {
-    public ?int $id = null;
-	public ?string $ci = null;
-	public ?string $nombre = null;
-	public ?string $psw = null;
-	public ?string $direccion = null;
-	public ?int $id_comuna = null;
-	public ?string $telefono = null;
-	public ?int $id_rol = null;
-    
+    public int $id;
+	public string $ci;
+	public string $cod;
+	public string $nombre;
+	public string $psw;
+	public string $direccion;
+	public int $id_comuna;
+	public string $telefono;    
 }

@@ -12,7 +12,7 @@ class ProductoService
 		{
 			$db = MySql::Connect();
 			$q = "SELECT * FROM productos_tienda pt INNER JOIN usuarios_tienda ut ON pt.id_tienda = ut.id_tienda
-				WHERE pt.id_tienda = ? AND ut.id_usuarios = ? AND pt.sku = ?";
+				WHERE pt.id_tienda = ? AND ut.id_usuario = ? AND pt.sku = ?";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(1, $id_tienda, PDO::PARAM_INT);
 			$stmt->bindParam(2, $id_usuario, PDO::PARAM_INT);
@@ -51,13 +51,13 @@ class ProductoService
 						FROM inventario I
 						INNER JOIN productos P ON I.sku = P.sku
 						INNER JOIN usuarios_tienda UT ON I.id_tienda = UT.id_tienda
-						WHERE I.id_tienda = :id_tienda AND UT.id_usuarios = :id_usuario
+						WHERE I.id_tienda = :id_tienda AND UT.id_usuario = :id_usuario
 						AND P.sku
 						UNION
 						SELECT I.*, P.nombre nombre_producto, P.id id_producto FROM inventario I
 						INNER JOIN productos_tienda P ON I.sku = P.sku AND P.id_tienda = :id_tienda
 						INNER JOIN usuarios_tienda UT ON I.id_tienda = UT.id_tienda
-						WHERE I.id_tienda = :id_tienda AND UT.id_usuarios = :id_usuario
+						WHERE I.id_tienda = :id_tienda AND UT.id_usuario = :id_usuario
 					) AS SUBQUERY
 					WHERE sku = :sku ORDER BY vencimiento ASC LIMIT 1";
 
@@ -84,7 +84,7 @@ class ProductoService
 			$db = MySql::Connect();
 			$q = "	SELECT PT.sku FROM productos_tienda PT
 					INNER JOIN usuarios_tienda UT ON PT.id_tienda = UT.id_tienda
-					WHERE PT.id_tienda = ? AND UT.id_usuarios = ?
+					WHERE PT.id_tienda = ? AND UT.id_usuario = ?
 					AND PT.sku = ?";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(1, $id_tienda, PDO::PARAM_INT);
@@ -105,7 +105,7 @@ class ProductoService
 		try
 		{
 			$db = MySql::Connect();
-			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuarios = ? AND id_tienda = ?";
+			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuario = ? AND id_tienda = ?";
 			$stmt3 = $db->prepare($q);
 			$stmt3->bindParam(1, $inventario->vendedor, PDO::PARAM_INT);
 			$stmt3->bindParam(2, $inventario->id_tienda, PDO::PARAM_INT);
@@ -157,7 +157,7 @@ class ProductoService
 		try
 		{
 			$db = MySql::Connect();
-			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuarios = ? AND id_tienda = ?";
+			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuario = ? AND id_tienda = ?";
 			$stmt3 = $db->prepare($q);
 			$stmt3->bindParam(1, $inventario->vendedor, PDO::PARAM_INT);
 			$stmt3->bindParam(2, $inventario->id_tienda, PDO::PARAM_INT);
@@ -215,7 +215,7 @@ class ProductoService
 		try
 		{
 			$db = MySql::Connect();
-			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuarios = ? AND id_tienda = ?";
+			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuario = ? AND id_tienda = ?";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(1, $id_usuario, PDO::PARAM_INT);
 			$stmt->bindParam(2, $id_tienda, PDO::PARAM_INT);

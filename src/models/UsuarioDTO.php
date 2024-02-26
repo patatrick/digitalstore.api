@@ -4,6 +4,6 @@ class UsuarioDTO
 {
     public Usuario $Usuario;
 
-    /** @var Tienda[] */
+    /** @var TiendaDTO[] */
     public array $Tienda = [];
 }

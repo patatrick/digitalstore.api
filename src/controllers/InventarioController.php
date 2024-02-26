@@ -20,6 +20,7 @@ class InventarioController
 			$id_tienda = $getData["id_tienda"];
 			$id_usuario = $this->getUserId($request);
 			$data = $this->inventarioService->Traer($id_tienda, $id_usuario);
+
 			$response->getBody()->write(json_encode([
 				"data" => $data,
 				"token" => $this->UpdateJWT($request)

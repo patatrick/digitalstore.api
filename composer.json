@@ -3,7 +3,9 @@
         "firebase/php-jwt": "^6.10",
         "slim/slim": "4.*",
         "slim/psr7": "^1.6",
-        "guzzlehttp/guzzle": "^7.8"
+        "guzzlehttp/guzzle": "^7.8",
+        "tuupola/cors-middleware": "^1.4",
+        "picqer/php-barcode-generator": "^2.4"
     },
     "autoload": {
         "psr-4": {

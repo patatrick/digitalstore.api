@@ -19,7 +19,12 @@ class MenuController
 		try
 		{
 			$id_usuario = $this->getUserId($request);
-			$data = $this->menuService->Traer($id_usuario);
+            $id_tienda = $getData["id_tienda"];
+            if (!$id_tienda) {
+                $response->getBody()->write("Bad Request");
+                return $response->withStatus(400);
+            }
+			$data = $this->menuService->Traer($id_usuario, $id_tienda);
 			$response->getBody()->write(json_encode([
 				"data" => $data,
 				"token" => $this->UpdateJWT($request)

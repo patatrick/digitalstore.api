@@ -1,7 +1,6 @@
 <?php
 namespace App\Controllers;
 use App\Models\Producto;
-use App\Models\ProductosTienda;
 use App\Services\GoogleService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -13,7 +12,6 @@ use App\Services\ProductoService;
 class ProductoController
 {
 	use TokenTrait;
-	use PostdataTrait;
 	private readonly ProductoService $productoService;
 	private readonly GoogleService $googleService;
 	public function __construct() {

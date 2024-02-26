@@ -9,4 +9,5 @@ class Tienda
 	public string $telefono;
 	public string $representante;
 	public string $ci;
+	public string $ip;
 }

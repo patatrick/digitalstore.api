@@ -3,4 +3,9 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
 
+<FilesMatch "\.(config)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
 Options -Indexes
