@@ -18,3 +18,4 @@ class Config
 }
 // $randomBytes = random_bytes(32);
 // $tokenKey = bin2hex($randomBytes);
+
