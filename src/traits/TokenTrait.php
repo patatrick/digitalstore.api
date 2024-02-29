@@ -79,4 +79,52 @@ trait TokenTrait
 		}
 		return $tienda->id_rol;
 	}
+    public function GenerateEAN13(int $num) : string
+	{
+		try
+		{
+			$codigoSinDigito = $num;
+			$codigoSinDigito = str_pad($codigoSinDigito, 12, '0', STR_PAD_LEFT);
+			$digitos = str_split($codigoSinDigito);
+			$sumaPares = $sumaImpares = 0;
+			foreach ($digitos as $indice => $digito) {
+				if (($indice % 2) == 0) {
+					$sumaPares += $digito;
+				} else {
+					$sumaImpares += $digito;
+				}
+			}
+			$sumaTotal = $sumaPares + $sumaImpares * 3;
+			$digitoControl = (10 - ($sumaTotal % 10)) % 10;
+			return  $codigoSinDigito . $digitoControl;
+		}
+		catch (\Throwable $th) {
+			echo "UsuarioController " . $th->getMessage()." in line ".$th->getLine();
+			http_response_code(500);
+			die();
+		}
+	}
+    private function GenerateEAN13Aleatorio() : string
+	{
+		try
+		{
+			$codigoSinDigito = rand(1, 1_000_000);
+            $codigoSinDigito = str_pad($codigoSinDigito, 12, '0', STR_PAD_LEFT);
+			$digitos = str_split($codigoSinDigito);
+			$sumaPares = $sumaImpares = 0;
+			foreach ($digitos as $indice => $digito) {
+				if (($indice % 2) == 0) {
+					$sumaPares += $digito;
+				} else {
+					$sumaImpares += $digito;
+				}
+			}
+			$sumaTotal = $sumaPares + $sumaImpares * 3;
+			$digitoControl = (10 - ($sumaTotal % 10)) % 10;
+			return  $codigoSinDigito . $digitoControl;
+		}
+		catch (\Throwable $th) {
+			return false;
+		}
+	}
 }

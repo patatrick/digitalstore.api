@@ -28,6 +28,7 @@ use App\Controllers\InventarioController;
 use App\Controllers\ProveedorController;
 use App\Controllers\VentaController;
 use App\Controllers\UsuarioController;
+use App\Controllers\EmpleadoController;
 
 $app = AppFactory::create();
 $app->setBasePath("/tienda.biotecnochile.api");
@@ -76,6 +77,15 @@ $app->group('/usuario', function (RouteCollectorProxy $group)
     $group->put('/tienda/{id_tienda}', [UsuarioController::class, "Update"])->add(new AdministradorOrJefeMiddleware);
     $group->put('/{id_usuario}/rol/{id_rol}/tienda/{id_tienda}', [UsuarioController::class, "UpdateRol"])->add(new AdministradorOrJefeMiddleware);
     $group->delete('/{id_usuario}/estado/{id_estado}/tienda/{id_tienda}', [UsuarioController::class, "Delete"])->add(new AdministradorOrJefeMiddleware);
+})->add(new AuthMiddleware);
+
+$app->group('/empleado', function (RouteCollectorProxy $group)
+{
+    $group->get('{cod}/tienda/{id_tienda}', [EmpleadoController::class, "GetOne"]);
+    $group->get('/tienda/{id_tienda}', [EmpleadoController::class, "GetAll"])->add(new AdministradorOrJefeMiddleware);
+    $group->post('/tienda/{id_tienda}', [EmpleadoController::class, "Insert"])->add(new AdministradorOrJefeMiddleware);
+    $group->put('/new_cod/{new_cod}/tienda/{id_tienda}', [EmpleadoController::class, "Update"])->add(new AdministradorOrJefeMiddleware);
+    $group->delete('/{ci}/tienda/{id_tienda}', [EmpleadoController::class, "Delete"])->add(new AdministradorOrJefeMiddleware);
 })->add(new AuthMiddleware);
 
 

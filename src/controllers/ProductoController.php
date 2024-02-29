@@ -184,12 +184,12 @@ class ProductoController
 			$existeSku = true;
 			$intentos = 0;
 			$maxIntentos = 20;  # Número máximo de intentos
-			$skuGenerado = str_pad($this->GenerateEAN13(), 13, '0', STR_PAD_LEFT);
+			$skuGenerado = str_pad($this->GenerateEAN13Aleatorio(), 13, '0', STR_PAD_LEFT);
 			$existeSku = $this->productoService->ExisteSkuInterno($id_tienda, $id_usuario, $skuGenerado);
 
 			if ($existeSku || !$this->ValidaEAN13($skuGenerado)) {
 				while ($existeSku === true && $intentos < $maxIntentos && !$this->ValidaEAN13($skuGenerado)) {
-					$skuGenerado = str_pad($this->GenerateEAN13(), 13, '0', STR_PAD_LEFT);
+					$skuGenerado = str_pad($this->GenerateEAN13Aleatorio(), 13, '0', STR_PAD_LEFT);
 					$existeSku = $this->productoService->ExisteSkuInterno($id_tienda, $id_usuario, $skuGenerado);
 					$intentos++;
 				}
@@ -222,29 +222,6 @@ class ProductoController
 			$sumaTotal = $sumaPares + $sumaImpares * 3;
 			$digitoControl = (10 - ($sumaTotal % 10)) % 10;
 			return  $codigoSinDigito . $digitoControl == $sku ? true : false;
-		}
-		catch (\Throwable $th) {
-			return false;
-		}
-	}
-	private function GenerateEAN13() : string
-	{
-		try
-		{
-			$codigoSinDigito = rand(1, 1_000_000);
-            $codigoSinDigito = str_pad($codigoSinDigito, 12, '0', STR_PAD_LEFT);
-			$digitos = str_split($codigoSinDigito);
-			$sumaPares = $sumaImpares = 0;
-			foreach ($digitos as $indice => $digito) {
-				if (($indice % 2) == 0) {
-					$sumaPares += $digito;
-				} else {
-					$sumaImpares += $digito;
-				}
-			}
-			$sumaTotal = $sumaPares + $sumaImpares * 3;
-			$digitoControl = (10 - ($sumaTotal % 10)) % 10;
-			return  $codigoSinDigito . $digitoControl;
 		}
 		catch (\Throwable $th) {
 			return false;

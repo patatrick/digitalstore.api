@@ -15,8 +15,8 @@ class LoginController
 		try
 		{
 			$postData = $request->getParsedBody();
-			$ci = $postData["ci"] ?? null;
-			$psw = $postData["psw"] ?? null;
+			$ci = empty(trim($postData["ci"])) ? null : trim($postData["ci"]);
+			$psw = empty(trim($postData["psw"])) ? null : trim($postData["psw"]);
 			if (!$ci || !$psw) {
 				$response->getBody()->write("Campos en blanco");
 				return $response->withStatus(400);
