@@ -8,6 +8,6 @@ class Usuario
 	public string $nombre;
 	public string $psw;
 	public string $direccion;
-	public int $id_comuna;
+	public string $id_comuna;
 	public string $telefono;    
 }

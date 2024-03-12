@@ -14,7 +14,7 @@ class ProveedorService
 			$db = MySql::Connect();
 			$q = "SELECT * FROM proveedores WHERE id_tienda = ?";
 			$stmt = $db->prepare($q);
-			$stmt->bindParam(1, $param, PDO::PARAM_INT);
+			$stmt->bindParam(1, $id_tienda, PDO::PARAM_INT);
 			$stmt->execute();
 			$data = $stmt->fetchAll(PDO::FETCH_CLASS, Proveedor::class);
 			
@@ -60,8 +60,7 @@ class ProveedorService
 			$q = "  UPDATE proveedores SET
 					nombre = :nombre,
 					descripcion = :descripcion,
-					telefono = :telefono,
-					id_tienda = :id_tienda
+					telefono = :telefono
 					WHERE id = :id
 			";
 			$stmt = $db->prepare($q);
@@ -69,7 +68,6 @@ class ProveedorService
 			$stmt->bindParam(":nombre", $proveedor->nombre, PDO::PARAM_STR);
 			$stmt->bindParam(":descripcion", $proveedor->descripcion, PDO::PARAM_STR);
 			$stmt->bindParam(":telefono", $proveedor->telefono, PDO::PARAM_STR);
-			$stmt->bindParam(":id_tienda", $proveedor->id_tienda, PDO::PARAM_INT);
 			$stmt->execute();
 			$exito = $stmt->rowCount() ? true : false;
 			$db = null;
@@ -82,14 +80,14 @@ class ProveedorService
 			die();
 		}
 	}
-	public function Delete(Proveedor $proveedor) : bool
+	public function Delete(int $id_proveedor) : bool
 	{
 		try
 		{
 			$db = MySql::Connect();
 			$q = "  DELETE FROM proveedores WHERE id = :id;";
 			$stmt = $db->prepare($q);
-			$stmt->bindParam(":id", $proveedor->id, PDO::PARAM_INT);
+			$stmt->bindParam(":id", $id_proveedor, PDO::PARAM_INT);
 			$stmt->execute();
 			$exito = $stmt->rowCount() ? true : false;
 			$db = null;

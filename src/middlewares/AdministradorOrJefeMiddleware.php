@@ -20,9 +20,9 @@ class AdministradorOrJefeMiddleware
 			$route = $routeContext->getRoute();
 			$id_tienda = (int) $route->getArgument('id_tienda');
 			$id_rol = $this->getRol($request, $id_tienda);
-			if ($id_rol != "A" || $id_rol != "J") {
+			if ($id_rol != "A" && $id_rol != "J") {
 				$response->getBody()->write("No tienes los permisos para este módulo");
-				return $response->withStatus(401);
+				return $response->withStatus(403);
 			}
 			return $handler->handle($request);
 		}

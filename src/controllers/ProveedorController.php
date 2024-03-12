@@ -71,4 +71,68 @@ class ProveedorController
 			return $response->withStatus(500);
 		}
 	}
+	public function Update(Request $request, Response $response, array $getData) : Response
+	{
+		try
+		{
+			$postData = json_decode(json_encode($request->getParsedBody()));
+			
+			$proveedor = new Proveedor();
+			$proveedor->id = trim($postData->id) ? $postData->id : null;
+			$proveedor->descripcion = trim($postData->descripcion) ? $postData->descripcion : null;
+			$proveedor->nombre = trim($postData->nombre) ? $postData->nombre : null;
+			$proveedor->telefono = trim($postData->telefono) ? $postData->telefono : null;
+
+			if (
+				!$proveedor->id ||
+				!$proveedor->nombre ||
+				!$proveedor->telefono
+			)
+			{
+				$response->getBody()->write("Bad Request");
+				return $response->withStatus(400);
+			}
+
+			$exito = $this->_proveedorService->Update($proveedor);
+            if (!$exito) {
+				$response->getBody()->write("Unprocessable Entity");
+				return $response->withStatus(422);
+			}
+			$response->getBody()->write(json_encode([
+				"data" => null,
+				"token" => $this->UpdateJWT($request)
+			]));
+			return $response;
+		}
+		catch (\Throwable $th) {
+			$response->getBody()->write($th->getMessage()." in line ".$th->getLine());
+			return $response->withStatus(500);
+		}
+    }
+	public function Delete(Request $request, Response $response, array $getData) : Response
+	{
+		try
+		{
+			$id_proveedor = (int) $getData["id_proveedor"];
+			if (!$id_proveedor) {
+				$response->getBody()->write("Bad Request");
+				return $response->withStatus(400);
+			}
+
+			$exito = $this->_proveedorService->Delete($id_proveedor);
+            if (!$exito) {
+				$response->getBody()->write("Unprocessable Entity");
+				return $response->withStatus(422);
+			}
+			$response->getBody()->write(json_encode([
+				"data" => null,
+				"token" => $this->UpdateJWT($request)
+			]));
+			return $response;
+		}
+		catch (\Throwable $th) {
+			$response->getBody()->write($th->getMessage()." in line ".$th->getLine());
+			return $response->withStatus(500);
+		}
+	}
 }

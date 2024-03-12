@@ -67,7 +67,7 @@ trait TokenTrait
 		}
 		return $tienda;
 	}
-	public function getRol(Request $request, int $id_tienda) : int
+	public function getRol(Request $request, int $id_tienda) : string
 	{
 		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
 		$playload = $this->DecodeJWT($token);
