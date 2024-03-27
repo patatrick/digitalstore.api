@@ -7,7 +7,7 @@ use \PDO;
 class EmpleadoService
 {
 	/** Retorna a un empleado de una tienda */
-	public function GetOne(string $ci_cod, int $id_tienda) : Empleado
+	public function GetOne(string $ci_cod, int $id_tienda) : Empleado | bool
 	{
 		try
 		{

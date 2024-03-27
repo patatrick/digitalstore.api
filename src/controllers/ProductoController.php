@@ -5,7 +5,6 @@ use App\Services\GoogleService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Traits\TokenTrait;
-use App\Traits\PostdataTrait;
 
 use App\Services\ProductoService;
 
@@ -54,7 +53,7 @@ class ProductoController
 		{
 			$id_usuario = $this->getUserId($request);
 			$id_tienda = $getData["id_tienda"];
-			$skuGenerado = $this->SkuUnico($id_tienda, $id_usuario);
+			$skuGenerado = $this->SkuUnico($id_tienda);
 
 			$response->getBody()->write(json_encode([
 				"data" => $skuGenerado,
@@ -71,16 +70,14 @@ class ProductoController
 	{
 		try
 		{
-			$id_usuario = $this->getUserId($request);
 			$id_tienda = $getData["id_tienda"];
-			$sku = $getData["sku"];
-            
-            if (!$this->ValidaEAN13($sku)) {
+			$sku = str_pad($getData["sku"], 13, '0', STR_PAD_LEFT);
+
+			if (!$this->ValidaEAN13($sku)) {
 				$response->getBody()->write("Sku desconocido o no válido");
 				return $response->withStatus(400);
 			}
-            $producto = $this->productoService->TraerProductoInventario($id_usuario, $sku, $id_tienda);
-
+			$producto = $this->productoService->TraerProductoInventario($sku, $id_tienda);
 			$response->getBody()->write(json_encode([
 				"data" => $producto,
 				"token" => $this->UpdateJWT($request)
@@ -97,27 +94,25 @@ class ProductoController
 		try
 		{
 			$postData = json_decode(json_encode($request->getParsedBody()));
-			$id_usuario = $this->getUserId($request);
-            $postData->inventario->vendedor = $id_usuario;
-
-            if ($postData->producto->id === null) {
-                $existeSku = $this->productoService->ExisteSkuInterno($postData->inventario->id_tienda, $id_usuario, $postData->producto->sku);
-                if ($existeSku) {
-                    $postData->producto->sku = null;
-                    $postData->inventario->sku = null;
-                    $postData->inventario->sku = $this->SkuUnico($postData->inventario->id_tienda, $id_usuario);
-                    $postData->producto->sku = $postData->inventario->sku;
-                }
-            }
-            $precioMayor = $postData->inventario->precio_mayor;
-            if ($precioMayor == 0) {
-                $postData->inventario->precio_mayor = $postData->inventario->precio;
-            }
+            $postData->producto->sku = str_pad($postData->producto->sku, 13, '0', STR_PAD_LEFT);
+			if ($postData->producto->id === null) {
+				$existeSku = $this->productoService->ExisteSkuInterno($postData->inventario->id_tienda, $postData->producto->sku);
+				if ($existeSku) {
+					$postData->producto->sku = null;
+					$postData->inventario->sku = null;
+					$postData->inventario->sku = $this->SkuUnico($postData->inventario->id_tienda);
+					$postData->producto->sku = $postData->inventario->sku;
+				}
+			}
+			$precioMayor = $postData->inventario->precio_mayor;
+			if ($precioMayor == 0) {
+				$postData->inventario->precio_mayor = $postData->inventario->precio;
+			}
 			$id_insertado = $this->productoService->Insertar($postData->producto, $postData->inventario);
-            if ($id_insertado === 0) {
-                $response->getBody()->write("No se insertaron los datos.");
-                return $response->withStatus(422);
-            }
+			if ($id_insertado === 0) {
+				$response->getBody()->write("No se insertaron los datos.");
+				return $response->withStatus(422);
+			}
 			$response->getBody()->write(json_encode([
 				"data" => $id_insertado,
 				"token" => $this->UpdateJWT($request)
@@ -135,13 +130,13 @@ class ProductoController
 		{
 			$postData = json_decode(json_encode($request->getParsedBody()));
 			$id_usuario = $this->getUserId($request);
-            $postData->inventario->vendedor = $id_usuario;
+			$postData->inventario->vendedor = $id_usuario;
 
 			$exito = $this->productoService->Actualizar($postData->producto, $postData->inventario);
-            if ($exito === false) {
-                $response->getBody()->write("No se actualizaron los datos.");
-                return $response->withStatus(422);
-            }
+			if ($exito === false) {
+				$response->getBody()->write("No se actualizaron los datos.");
+				return $response->withStatus(422);
+			}
 			$response->getBody()->write(json_encode([
 				"data" => $exito,
 				"token" => $this->UpdateJWT($request)
@@ -162,10 +157,10 @@ class ProductoController
 			$id_usuario = $this->getUserId($request);
 
 			$exito = $this->productoService->Eliminar($id_inventario, $id_tienda, $id_usuario);
-            if ($exito === false) {
-                $response->getBody()->write("No se eliminaron los datos");
-                return $response->withStatus(422);
-            }
+			if ($exito === false) {
+				$response->getBody()->write("No se eliminaron los datos");
+				return $response->withStatus(422);
+			}
 			$response->getBody()->write(json_encode([
 				"data" => $exito,
 				"token" => $this->UpdateJWT($request)
@@ -177,7 +172,7 @@ class ProductoController
 			return $response->withStatus(500);
 		}
 	}
-	private function SkuUnico($id_tienda, $id_usuario) : string
+	private function SkuUnico($id_tienda) : string
 	{
 		try
 		{
@@ -185,12 +180,12 @@ class ProductoController
 			$intentos = 0;
 			$maxIntentos = 20;  # Número máximo de intentos
 			$skuGenerado = str_pad($this->GenerateEAN13Aleatorio(), 13, '0', STR_PAD_LEFT);
-			$existeSku = $this->productoService->ExisteSkuInterno($id_tienda, $id_usuario, $skuGenerado);
+			$existeSku = $this->productoService->ExisteSkuInterno($id_tienda, $skuGenerado);
 
 			if ($existeSku || !$this->ValidaEAN13($skuGenerado)) {
 				while ($existeSku === true && $intentos < $maxIntentos && !$this->ValidaEAN13($skuGenerado)) {
 					$skuGenerado = str_pad($this->GenerateEAN13Aleatorio(), 13, '0', STR_PAD_LEFT);
-					$existeSku = $this->productoService->ExisteSkuInterno($id_tienda, $id_usuario, $skuGenerado);
+					$existeSku = $this->productoService->ExisteSkuInterno($id_tienda, $skuGenerado);
 					$intentos++;
 				}
 			}
@@ -209,6 +204,7 @@ class ProductoController
 	{
 		try
 		{
+			$sku = str_pad($sku, 13, '0', STR_PAD_LEFT);
 			$codigoSinDigito = substr($sku, 0, strlen($sku) - 1);	
 			$digitos = str_split($codigoSinDigito);
 			$sumaPares = $sumaImpares = 0;
@@ -231,9 +227,9 @@ class ProductoController
 	{
 		try
 		{
-            if (strlen(ltrim($sku, '0')) < 8) {
-                return [];
-            }
+			if (strlen(ltrim($sku, '0')) < 8) {
+				return [];
+			}
 			$nombreProducto = $this->googleService->index($sku);
 			if ($nombreProducto === null) {
 				return [];

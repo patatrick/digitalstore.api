@@ -19,12 +19,34 @@ class MenuController
 		try
 		{
 			$id_usuario = $this->getUserId($request);
-            $id_tienda = $getData["id_tienda"];
-            if (!$id_tienda) {
-                $response->getBody()->write("Bad Request");
-                return $response->withStatus(400);
-            }
+			$id_tienda = $getData["id_tienda"];
+			if (!$id_tienda) {
+				$response->getBody()->write("Bad Request");
+				return $response->withStatus(400);
+			}
 			$data = $this->menuService->Traer($id_usuario, $id_tienda);
+			$response->getBody()->write(json_encode([
+				"data" => $data,
+				"token" => $this->UpdateJWT($request)
+			]));
+			return $response;
+		}
+		catch (\Throwable $th) {
+			$response->getBody()->write("MenuController ".$th->getMessage()." in line ".$th->getLine());
+			return $response->withStatus(500);
+		}
+	}
+	public function MenuVentas(Request $request, Response $response, $getData) : Response
+	{
+		try
+		{
+			$id_usuario = $this->getUserId($request);
+			$id_tienda = $getData["id_tienda"];
+			if (!$id_tienda) {
+				$response->getBody()->write("Bad Request");
+				return $response->withStatus(400);
+			}
+			$data = $this->menuService->MenuVentas();
 			$response->getBody()->write(json_encode([
 				"data" => $data,
 				"token" => $this->UpdateJWT($request)

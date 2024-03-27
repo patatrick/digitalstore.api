@@ -1,6 +1,7 @@
 <?php
 namespace App\Middlewares;
 
+use App\Config;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
@@ -10,8 +11,9 @@ class CustomCorsMiddleware
 {
     public function __invoke(Request $request, RequestHandler $handler): Response
     {
+        $config = new Config();
         $corsMiddleware = new CorsMiddleware([
-            "origin" => ["*"],
+            "origin" => $config->cors['url'],
             "methods" => ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "headers.allow" => ["Authorization", "Content-Type"],
             "headers.expose" => [],
@@ -24,7 +26,6 @@ class CustomCorsMiddleware
             },
             "logger" => null,
         ]);
-
         return $corsMiddleware->process($request, $handler);
     }
 }

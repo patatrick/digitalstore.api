@@ -7,7 +7,7 @@ class InventarioDTO
 	public ?int $id_tienda = null;
 	public ?string $sku = null;
 	public ?int $cantidad = null;
-	public ?int $vendedor = null;
+	public ?string $vendedor = null;
 	public ?string $vencimiento = null;
 	public ?string $ingreso = null;
 	public ?int $precio = null;

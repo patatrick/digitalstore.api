@@ -4,6 +4,8 @@ class Observacion
 {
 	public int $id;
 	public string $descripcion;
-	public int $id_usuario;
+	public string $ci_empleado;
+	public string $ci_ingresa;
 	public string $ingreso;
+	public int $id_tienda;
 }

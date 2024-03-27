@@ -78,10 +78,16 @@ class EmpleadoController
 			$id_tienda = (int) $getData["id_tienda"];
 			$cod = (int) base64_decode($getData["cod"]);
 			if (!$cod || $cod == 0) {
-				$response->getBody()->write("Bad Request");
+				$response->getBody()->write("Código erróneo");
 				return $response->withStatus(400);
 			}
+            $cod = str_pad($cod, 13, '0', STR_PAD_LEFT);
+            
 			$data = $this->_empleadoService->GetOne($cod, $id_tienda);
+            if (!$data) {
+                $response->getBody()->write("No se encontró al usuario");
+                return $response->withStatus(406);
+            }
 			$cod = $data->cod;
 			$data->cod = null;
 			$data->cod = base64_encode($cod);

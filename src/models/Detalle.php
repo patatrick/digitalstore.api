@@ -10,4 +10,5 @@ class Detalle
 	public int $precio = 0;
 	public int $precio_un = 0;
 	public bool $mayorista = false;
+	public int $nro_caja = 0;
 }

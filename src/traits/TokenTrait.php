@@ -11,11 +11,11 @@ trait TokenTrait
         $config = new Config();
         return $config;
     }
-	public function GenerateJWT($playLoad) : string
+	public function GenerateJWT($playLoad, $noExpire = false) : string
 	{
 		try
 		{
-			$playLoad["exp"] = time() + $this->Config()->token["exp"];
+			$playLoad["exp"] = ($noExpire === true) ? (time() + (365 * 24 * 60 * 60 * 10)) : (time() + $this->Config()->token["exp"]);
 			return JWT::encode($playLoad, $this->Config()->token["key"], "HS256");
 		}
 		catch (\Throwable $th) {
@@ -47,25 +47,30 @@ trait TokenTrait
 		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
 		return $this->GenerateJWT((array) $this->DecodeJWT($token));
 	}
+	public function getNroCaja(Request $request) : int
+	{
+		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
+		$playload = $this->DecodeJWT($token);
+		return (int) $playload->nro_caja;
+	}
+	public function getIdCaja(Request $request) : int
+	{
+		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
+		$playload = $this->DecodeJWT($token);
+		return (int) $playload->id_caja;
+	}
 	public function getUserId(Request $request) : int
 	{
 		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
 		$playload = $this->DecodeJWT($token);
-		return $playload->id_usuario;
+		return (int) $playload->id_usuario;
 	}
 	/** @return \App\Models\TiendaDTO */
 	public function getTienda(Request $request, int $id_tienda)
 	{
 		$token = trim(str_replace("Bearer ", "", $request->getHeaderLine('Authorization')));
 		$playload = $this->DecodeJWT($token);
-		$tienda = null;
-		foreach ($playload->tienda as $value) {
-
-			if ($value->id == $id_tienda) {
-				$tienda = $value; 
-			}
-		}
-		return $tienda;
+		return $playload->tienda;
 	}
 	public function getRol(Request $request, int $id_tienda) : string
 	{

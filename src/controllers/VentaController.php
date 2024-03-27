@@ -18,9 +18,7 @@ class VentaController
 		try
 		{
 			$postData = json_decode(json_encode($request->getParsedBody()));
-			$postData->id_vendedor = $this->getUserId($request);
-
-			$data = $this->_ventaService->Insertar($postData);
+			$data = $this->_ventaService->Insertar($postData, $this->getNroCaja($request));
 			if ($data === false) {
 				$response->getBody()->write("No se insertaron los datos");
 				return $response->withStatus(400);

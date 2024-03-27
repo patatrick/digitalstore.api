@@ -38,7 +38,7 @@ class ProductoService
 			die();
 		}
 	}
-	public function TraerProductoInventario(int $id_usuario, string $sku, int $id_tienda) : Producto | bool
+	public function TraerProductoInventario(string $sku, int $id_tienda) : Producto | bool
 	{
 		try
 		{
@@ -50,20 +50,17 @@ class ProductoService
 						SELECT I.*, P.nombre nombre_producto, P.id id_producto
 						FROM inventario I
 						INNER JOIN productos P ON I.sku = P.sku
-						INNER JOIN usuarios_tienda UT ON I.id_tienda = UT.id_tienda
-						WHERE I.id_tienda = :id_tienda AND UT.id_usuario = :id_usuario
+						WHERE I.id_tienda = :id_tienda
 						AND P.sku
 						UNION
 						SELECT I.*, P.nombre nombre_producto, P.id id_producto FROM inventario I
 						INNER JOIN productos_tienda P ON I.sku = P.sku AND P.id_tienda = :id_tienda
-						INNER JOIN usuarios_tienda UT ON I.id_tienda = UT.id_tienda
-						WHERE I.id_tienda = :id_tienda AND UT.id_usuario = :id_usuario
+						WHERE I.id_tienda = :id_tienda
 					) AS SUBQUERY
 					WHERE sku = :sku ORDER BY vencimiento ASC LIMIT 1";
 
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(":id_tienda", $id_tienda, PDO::PARAM_INT);
-			$stmt->bindParam(":id_usuario", $id_usuario, PDO::PARAM_INT);
 			$stmt->bindParam(":sku", $sku, PDO::PARAM_STR);
 			$stmt->execute();
 			$producto = $stmt->fetchObject(Producto::class);
@@ -77,19 +74,15 @@ class ProductoService
 			die();
 		}
 	}
-	public function ExisteSkuInterno(int $id_tienda, int $id_usuario, string $sku) : bool
+	public function ExisteSkuInterno(int $id_tienda, string $sku) : bool
 	{
 		try
 		{
 			$db = MySql::Connect();
-			$q = "	SELECT PT.sku FROM productos_tienda PT
-					INNER JOIN usuarios_tienda UT ON PT.id_tienda = UT.id_tienda
-					WHERE PT.id_tienda = ? AND UT.id_usuario = ?
-					AND PT.sku = ?";
+			$q = "SELECT sku FROM productos_tienda WHERE id_tienda = ? AND sku = ?";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(1, $id_tienda, PDO::PARAM_INT);
-			$stmt->bindParam(2, $id_usuario, PDO::PARAM_INT);
-			$stmt->bindParam(3, $sku, PDO::PARAM_STR);
+			$stmt->bindParam(2, $sku, PDO::PARAM_STR);
 			$stmt->execute();
 			return $stmt->fetch(PDO::FETCH_OBJ) ? true : false;
 		}
@@ -105,25 +98,13 @@ class ProductoService
 		try
 		{
 			$db = MySql::Connect();
-			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuario = ? AND id_tienda = ?";
-			$stmt3 = $db->prepare($q);
-			$stmt3->bindParam(1, $inventario->vendedor, PDO::PARAM_INT);
-			$stmt3->bindParam(2, $inventario->id_tienda, PDO::PARAM_INT);
-			$stmt3->execute();
-			$usuarioTienda = $stmt3->fetch(PDO::FETCH_OBJ);
-			if (!$usuarioTienda) {
-				$db = null;
-				return 0;
-			}
-
 			$db->beginTransaction();
-			$q = "  CALL sp_sku_interno_insertar(?, ?, ?, ?, ?);";
+			$q = "  CALL sp_sku_interno_insertar(?, ?, ?, ?);";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(1, $producto->id, PDO::PARAM_INT);
-			$stmt->bindParam(2, $inventario->vendedor, PDO::PARAM_INT);
-			$stmt->bindParam(3, $inventario->id_tienda, PDO::PARAM_INT);
-			$stmt->bindParam(4, $producto->sku, PDO::PARAM_STR);
-			$stmt->bindParam(5, $producto->nombre, PDO::PARAM_STR);
+			$stmt->bindParam(2, $inventario->id_tienda, PDO::PARAM_INT);
+			$stmt->bindParam(3, $producto->sku, PDO::PARAM_STR);
+			$stmt->bindParam(4, $producto->nombre, PDO::PARAM_STR);
 			$stmt->execute();
 			$db->lastInsertId();
 
@@ -133,7 +114,7 @@ class ProductoService
 			$stmt2->bindParam(1, $inventario->id_tienda, PDO::PARAM_INT);
 			$stmt2->bindParam(2, $inventario->sku, PDO::PARAM_STR);
 			$stmt2->bindParam(3, $inventario->cantidad, PDO::PARAM_INT);
-			$stmt2->bindParam(4, $inventario->vendedor, PDO::PARAM_INT);
+			$stmt2->bindParam(4, $inventario->vendedor, PDO::PARAM_STR);
 			$stmt2->bindParam(5, $inventario->vencimiento, PDO::PARAM_STR);
 			$stmt2->bindParam(6, $inventario->precio, PDO::PARAM_INT);
 			$stmt2->bindParam(7, $inventario->id_tipo_producto, PDO::PARAM_INT);
