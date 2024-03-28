@@ -1,5 +1,5 @@
 <?php
-const PRODUCTION = true;
+const PRODUCTION = false;
 
 if (PRODUCTION === false) {
 	ini_set('display_errors', 1);
@@ -57,8 +57,8 @@ $app->group('/producto', function (RouteCollectorProxy $group)
 	$group->get('/inventario/tienda/{id_tienda}/sku/{sku}', [ProductoController::class, "TraerProductoInventario"]);
 	$group->get('/tienda/{id_tienda}/generar-sku-interno', [ProductoController::class, "TraerSku"]);
 	$group->post('/tienda/{id_tienda}', [ProductoController::class, "Insertar"]);
-	$group->put('/tienda/{id_tienda}', [ProductoController::class, "Actualizar"]);
-	$group->delete('/tienda/{id_tienda}/inventario/{id_inventario}', [ProductoController::class, "Eliminar"]);
+	$group->put('/tienda/{id_tienda}', [ProductoController::class, "Actualizar"])->add(new AdministradorOrJefeMiddleware);
+	$group->delete('/tienda/{id_tienda}/inventario/{id_inventario}', [ProductoController::class, "Eliminar"])->add(new AdministradorOrJefeMiddleware);
 })->add(new AuthMiddleware);
 
 $app->group('/inventario', function (RouteCollectorProxy $group)
@@ -94,17 +94,7 @@ $app->get('/empleado/{cod}/tienda/{id_tienda}', [EmpleadoController::class, "Get
 $app->group('/empleado', function (RouteCollectorProxy $group)
 {
 	$group->get('/tienda/{id_tienda}', [EmpleadoController::class, "GetAll"])->add(new AdministradorOrJefeMiddleware);
-	$group->get('/comuna/tienda/{id_tienda}', [EmpleadoController::class, "GetAllAndCommune"])->add(new AdministradorOrJefeMiddleware);
-	$group->post('/tienda/{id_tienda}', [EmpleadoController::class, "Insert"])->add(new AdministradorOrJefeMiddleware);
-	$group->put('/new_cod/{new_cod}/tienda/{id_tienda}', [EmpleadoController::class, "Update"])->add(new AdministradorOrJefeMiddleware);
-	$group->delete('/{ci}/tienda/{id_tienda}', [EmpleadoController::class, "Delete"])->add(new AdministradorOrJefeMiddleware);
-})->add(new AuthMiddleware);
-
-$app->group('/observacion', function (RouteCollectorProxy $group)
-{
-	$group->get('/{cod}/tienda/{id_tienda}', [EmpleadoController::class, "GetOne"]);
-	$group->get('/tienda/{id_tienda}', [EmpleadoController::class, "GetAll"])->add(new AdministradorOrJefeMiddleware);
-	$group->get('/comuna/tienda/{id_tienda}', [EmpleadoController::class, "GetAllAndCommune"])->add(new AdministradorOrJefeMiddleware);
+	$group->get('/comuna/todas/tienda/{id_tienda}', [EmpleadoController::class, "GetAllAndCommune"])->add(new AdministradorOrJefeMiddleware);
 	$group->post('/tienda/{id_tienda}', [EmpleadoController::class, "Insert"])->add(new AdministradorOrJefeMiddleware);
 	$group->put('/new_cod/{new_cod}/tienda/{id_tienda}', [EmpleadoController::class, "Update"])->add(new AdministradorOrJefeMiddleware);
 	$group->delete('/{ci}/tienda/{id_tienda}', [EmpleadoController::class, "Delete"])->add(new AdministradorOrJefeMiddleware);

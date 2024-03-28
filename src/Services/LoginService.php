@@ -58,7 +58,7 @@ class LoginService
 			$db = MySql::Connect();
 			$q = "SELECT t.id, t.nombre, t.cant_cajas FROM tienda t
             INNER JOIN empleados e ON e.id_tienda = t.id
-            WHERE t.id = :id_tienda AND e.cod = :sku AND (t.ip = :ip OR :ip = :ip_master) AND :nro_caja <= t.cant_cajas";
+            WHERE t.id = :id_tienda AND e.cod = :sku AND (t.ip = :ip OR :ip = :ip_master) AND :nro_caja <= t.cant_cajas AND e.id_rol <> 'C'";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(":id_tienda", $id_tienda, PDO::PARAM_INT);
 			$stmt->bindParam(":sku", $sku_jefeTienda, PDO::PARAM_STR);

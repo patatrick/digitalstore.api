@@ -46,10 +46,10 @@ class EmpleadoController
 			$id_tienda = (int) $getData["id_tienda"];
 			$empleado = $this->_empleadoService->GetAll($id_tienda);
 			$comunas = $this->_comunaService->GetAll();
-            $roles = [
-                [ "id"=>"J", "nombre"=>"Jefe de tienda" ],
-                [ "id"=>"C", "nombre"=>"Cajero" ],
-            ];
+			$roles = [
+				[ "id"=>"J", "nombre"=>"Jefe de tienda" ],
+				[ "id"=>"C", "nombre"=>"Cajero" ],
+			];
 			foreach ($empleado as $key => $value) {
 				$cod = $value->cod;
 				$empleado[$key]->cod = null;
@@ -81,13 +81,13 @@ class EmpleadoController
 				$response->getBody()->write("Código erróneo");
 				return $response->withStatus(400);
 			}
-            $cod = str_pad($cod, 13, '0', STR_PAD_LEFT);
-            
+			$cod = str_pad($cod, 13, '0', STR_PAD_LEFT);
+			
 			$data = $this->_empleadoService->GetOne($cod, $id_tienda);
-            if (!$data) {
-                $response->getBody()->write("No se encontró al usuario");
-                return $response->withStatus(406);
-            }
+			if (!$data) {
+				$response->getBody()->write("No se encontró al usuario");
+				return $response->withStatus(406);
+			}
 			$cod = $data->cod;
 			$data->cod = null;
 			$data->cod = base64_encode($cod);
@@ -130,7 +130,11 @@ class EmpleadoController
 				$response->getBody()->write("Bad Request");
 				return $response->withStatus(400);
 			}
-
+			$existeUsuario = $this->_empleadoService->GetOne($empleado->ci, $id_tienda);
+			if ($existeUsuario) {
+				$response->getBody()->write("Usuario ya existe como trabajador en la tienda!");
+				return $response->withStatus(404);
+			}
 			$exiteCod = true;
 			while ($exiteCod) {
 				$empleado->cod = null;
@@ -163,7 +167,7 @@ class EmpleadoController
 			$postData = json_decode(json_encode($request->getParsedBody()));
 
 			$empleado = new Empleado();
-            $empleado->ci = trim($postData->ci);
+			$empleado->ci = trim($postData->ci);
 			$empleado->id_tienda = (int) trim($postData->id_tienda);
 			$empleado->id_rol = trim($postData->id_rol);
 			$empleado->cod = base64_decode($postData->cod);

@@ -3,12 +3,13 @@ namespace App\Models;
 class Empleado
 {
 	public string $ci = "";
-	public int $id_tienda;
-	public string $id_rol;
-	public ?string $cod;
-	public string $nombre;
-	public string $direccion;
-	public string $id_comuna;
-	public string $telefono;
+	public int $id_tienda = 0;
+	public string $id_rol = "";
+	public ?string $cod = "";
+	public string $nombre = "";
+	public string $direccion = "";
+	public string $id_comuna = "0";
+	public string $telefono = "";
 	public int $estado = 1;
+	public string $ingreso = "";
 }

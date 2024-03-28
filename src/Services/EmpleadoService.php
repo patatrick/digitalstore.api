@@ -56,7 +56,7 @@ class EmpleadoService
 		try
 		{
 			$db = MySql::Connect();
-			$q = "INSERT INTO empleados (:ci, :id_tienda, :id_rol, :cod, :nombre, :direccion, :id_comuna, :telefono)";
+			$q = "INSERT INTO empleados(ci, id_tienda, id_rol, cod, nombre, direccion, id_comuna, telefono, estado) VALUES(:ci, :id_tienda, :id_rol, :cod, :nombre, :direccion, :id_comuna, :telefono, :estado)";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(":ci", $empleado->ci, PDO::PARAM_STR);
 			$stmt->bindParam(":id_tienda", $empleado->id_tienda, PDO::PARAM_INT);
@@ -66,6 +66,7 @@ class EmpleadoService
 			$stmt->bindParam(":direccion", $empleado->direccion, PDO::PARAM_STR);
 			$stmt->bindParam(":id_comuna", $empleado->id_comuna, PDO::PARAM_STR);
 			$stmt->bindParam(":telefono", $empleado->telefono, PDO::PARAM_STR);
+			$stmt->bindParam(":estado", $empleado->estado, PDO::PARAM_INT);
 			$stmt->execute();
 			$exito = $stmt->rowCount() ? true : false;
 			$db = null;

@@ -129,9 +129,6 @@ class ProductoController
 		try
 		{
 			$postData = json_decode(json_encode($request->getParsedBody()));
-			$id_usuario = $this->getUserId($request);
-			$postData->inventario->vendedor = $id_usuario;
-
 			$exito = $this->productoService->Actualizar($postData->producto, $postData->inventario);
 			if ($exito === false) {
 				$response->getBody()->write("No se actualizaron los datos.");

@@ -135,30 +135,17 @@ class ProductoService
 	}
 	public function Actualizar($producto, $inventario) : bool
 	{
+		$db = MySql::Connect();
+		$db->beginTransaction();
 		try
 		{
-			$db = MySql::Connect();
-			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuario = ? AND id_tienda = ?";
-			$stmt3 = $db->prepare($q);
-			$stmt3->bindParam(1, $inventario->vendedor, PDO::PARAM_INT);
-			$stmt3->bindParam(2, $inventario->id_tienda, PDO::PARAM_INT);
-			$stmt3->execute();
-			$usuarioTienda = $stmt3->fetch(PDO::FETCH_OBJ);
-			if (!$usuarioTienda) {
-				$db = null;
-				return false;
-			}
-
-			$db->beginTransaction();
-			$q = "  CALL sp_sku_interno_insertar(?, ?, ?, ?, ?);";
+			$q = "  CALL sp_sku_interno_insertar(?, ?, ?, ?);";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(1, $producto->id, PDO::PARAM_INT);
-			$stmt->bindParam(2, $inventario->vendedor, PDO::PARAM_INT);
-			$stmt->bindParam(3, $inventario->id_tienda, PDO::PARAM_INT);
-			$stmt->bindParam(4, $producto->sku, PDO::PARAM_STR);
-			$stmt->bindParam(5, $producto->nombre, PDO::PARAM_STR);
+			$stmt->bindParam(2, $inventario->id_tienda, PDO::PARAM_INT);
+			$stmt->bindParam(3, $producto->sku, PDO::PARAM_STR);
+			$stmt->bindParam(4, $producto->nombre, PDO::PARAM_STR);
 			$stmt->execute();
-
 
 			$q = "  UPDATE inventario SET
 					cantidad = ?,
@@ -191,31 +178,20 @@ class ProductoService
 		$db = null;
 		return $exito;
 	}
-	public function Eliminar(int $id_inventario, int $id_tienda, int $id_usuario) : bool
+	public function Eliminar(int $id_inventario, int $id_tienda) : bool
 	{
 		try
 		{
 			$db = MySql::Connect();
-			$q = "	SELECT * FROM usuarios_tienda WHERE id_usuario = ? AND id_tienda = ?";
+			$q = "DELETE FROM inventario WHERE id = ?";
 			$stmt = $db->prepare($q);
-			$stmt->bindParam(1, $id_usuario, PDO::PARAM_INT);
-			$stmt->bindParam(2, $id_tienda, PDO::PARAM_INT);
+			$stmt->bindParam(1, $id_inventario, PDO::PARAM_INT);
 			$stmt->execute();
-			$usuarioTienda = $stmt->fetch(PDO::FETCH_OBJ);
-			if (!$usuarioTienda) {
-				$db = null;
-				return false;
-			}
-
-			$q = "  DELETE FROM inventario WHERE id = ?";
-			$stmt2 = $db->prepare($q);
-			$stmt2->bindParam(1, $id_inventario, PDO::PARAM_INT);
-			$stmt2->execute();
-			return $stmt2->rowCount() != 0 ? true : false;
+			return $stmt->rowCount() != 0 ? true : false;
 		}
 		catch (\PDOException $e) {
-			echo "No se puede eliminar porque tienes detalles de ventas asociados al producto";
-			http_response_code(422);
+			echo "No se puede eliminar porque tienes informes de ventas asociados al producto";
+			http_response_code(423);
 			$db = null;
 			die();
 		}
