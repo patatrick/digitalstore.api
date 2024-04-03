@@ -33,6 +33,7 @@ use App\Controllers\ProveedorController;
 use App\Controllers\VentaController;
 use App\Controllers\UsuarioController;
 use App\Controllers\EmpleadoController;
+use App\Controllers\SkuController;
 
 $app = AppFactory::create();
 if (PRODUCTION === false) {
@@ -50,6 +51,7 @@ $app->add(new CustomCorsMiddleware());
 // Routes
 // $app->get('/hello', [HelloController::class, "Index"]);
 $app->post('/login', [LoginController::class, "Index"]);
+$app->get('/sku/{cantidad_cajas}/tienda/{id_tienda}', [SkuController::class, "Index"])->add(new AdministradorOrJefeMiddleware);
 $app->get('/menu/tienda/{id_tienda}', [MenuController::class, "Index"])->add(new AuthMiddleware);
 $app->group('/producto', function (RouteCollectorProxy $group)
 {
