@@ -2,6 +2,7 @@
 namespace App\Controllers;
 use App\Models\Empleado;
 use App\Services\ComunaService;
+use Picqer\Barcode\BarcodeGeneratorSVG;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Traits\TokenTrait;
@@ -23,10 +24,20 @@ class EmpleadoController
 		{
 			$id_tienda = (int) $getData["id_tienda"];
 			$data = $this->_empleadoService->GetAll($id_tienda);
+			
+			$generator = new BarcodeGeneratorSVG();
 			foreach ($data as $key => $value) {
 				$cod = $value->cod;
+				$barcode = $generator->getBarcode($cod, $generator::TYPE_EAN_13, 3, 100);
+				$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
+				$barcodeWithName = <<<HTML
+					<div style="display: flex;flex-direction: column; width: fit-content;text-align: center;">
+						<strong>$value->nombre</strong>
+						$barcode
+					</div>
+				HTML;
 				$data[$key]->cod = null;
-				$data[$key]->cod = base64_encode($cod);
+				$data[$key]->cod = base64_encode($barcodeWithName);
 			}
 			$response->getBody()->write(json_encode([
 				"data" => $data,
@@ -50,10 +61,19 @@ class EmpleadoController
 				[ "id"=>"J", "nombre"=>"Jefe de tienda" ],
 				[ "id"=>"C", "nombre"=>"Cajero" ],
 			];
+			$generator = new BarcodeGeneratorSVG();
 			foreach ($empleado as $key => $value) {
-				$cod = $value->cod;
+				$cod = (int) $value->cod;
+				$barcode = $generator->getBarcode($cod, $generator::TYPE_EAN_13, 3, 100);
+				$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
+				$barcodeWithName = <<<HTML
+					<div style="display: flex;flex-direction: column; width: fit-content;text-align: center;">
+						<strong>$value->nombre</strong>
+						$barcode
+					</div>
+				HTML;
 				$empleado[$key]->cod = null;
-				$empleado[$key]->cod = base64_encode($cod);
+				$empleado[$key]->cod = base64_encode($barcodeWithName);
 			}
 			$data = (object) [
 				"empleados" => $empleado,
@@ -147,8 +167,17 @@ class EmpleadoController
 				$response->getBody()->write("Unprocessable Entity");
 				return $response->withStatus(422);
 			}
+			$generator = new BarcodeGeneratorSVG();
+			$barcode = $generator->getBarcode((int) $empleado->cod, $generator::TYPE_EAN_13, 3, 100);
+			$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
+			$barcodeWithName = <<<HTML
+				<div style="display: flex;flex-direction: column; width: fit-content;text-align: center;">
+					<strong>$empleado->nombre</strong>
+					$barcode
+				</div>
+			HTML;
 			$response->getBody()->write(json_encode([
-				"data" => null,
+				"data" => base64_encode($barcodeWithName),
 				"token" => $this->UpdateJWT($request)
 			]));
 			return $response;
@@ -195,13 +224,23 @@ class EmpleadoController
 					$exiteCod = $this->_empleadoService->GetOne($empleado->cod, $id_tienda);
 				}
 			}
+
 			$exito = $this->_empleadoService->Update($empleado, $id_tienda);
 			if (!$exito) {
 				$response->getBody()->write("Unprocessable Entity");
 				return $response->withStatus(422);
 			}
+			$generator = new BarcodeGeneratorSVG();
+			$barcode = $generator->getBarcode($empleado->cod, $generator::TYPE_EAN_13, 3, 100);
+			$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
+			$barcodeWithName = <<<HTML
+				<div style="display: flex;flex-direction: column; width: fit-content;text-align: center;">
+					<strong>$empleado->nombre</strong>
+					$barcode
+				</div>
+			HTML;
 			$response->getBody()->write(json_encode([
-				"data" => null,
+				"data" => base64_encode($barcodeWithName),
 				"token" => $this->UpdateJWT($request)
 			]));
 			return $response;
