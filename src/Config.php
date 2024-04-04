@@ -3,7 +3,7 @@ namespace App;
 class Config
 {
 	public string $hash_semilla;
-	public string $ip_master;
+	public array $ip_master;
 	public array $cors;
 	public array $token;
 	public array $api;

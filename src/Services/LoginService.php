@@ -2,6 +2,7 @@
 namespace App\Services;
 use App\Config;
 use App\Models\Empleado;
+use App\Models\EmpleadoDTO;
 use App\Models\TiendaDTO;
 use App\Models\Usuario;
 use App\Models\UsuarioDTO;
@@ -9,10 +10,10 @@ use App\Services\MySqlService As MySql;
 use \PDO;
 class LoginService
 {
-    private readonly Config $_config;
-    public function __construct() {
-        $this->_config = new Config();
-    }
+	private readonly Config $_config;
+	public function __construct() {
+		$this->_config = new Config();
+	}
 	public function Index(string $ci, string $psw) : UsuarioDTO | null
 	{
 		try
@@ -56,19 +57,32 @@ class LoginService
 		try
 		{
 			$db = MySql::Connect();
-			$q = "SELECT t.id, t.nombre, t.cant_cajas FROM tienda t
-            INNER JOIN empleados e ON e.id_tienda = t.id
-            WHERE t.id = :id_tienda AND e.cod = :sku AND (t.ip = :ip OR :ip = :ip_master) AND :nro_caja <= t.cant_cajas AND e.id_rol <> 'C'";
+			$q = "SELECT t.id, t.nombre, t.cant_cajas, t.ip FROM tienda t
+			INNER JOIN empleados e ON e.id_tienda = t.id
+			WHERE t.id = :id_tienda AND e.cod = :sku AND :nro_caja <= t.cant_cajas AND e.id_rol <> 'C'";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(":id_tienda", $id_tienda, PDO::PARAM_INT);
 			$stmt->bindParam(":sku", $sku_jefeTienda, PDO::PARAM_STR);
-			$stmt->bindParam(":ip", $ip, PDO::PARAM_STR);
-			$stmt->bindParam(":ip_master", $this->_config->ip_master, PDO::PARAM_STR);
 			$stmt->bindParam(":nro_caja", $nro_caja, PDO::PARAM_INT);
 			$stmt->execute();
 			$data = $stmt->fetch(PDO::FETCH_OBJ);
 			$db = null;
-			return $data ? $data : null;
+			if ($data) {
+				$autorizar = false;
+				if ($ip == $data->ip) {
+					$autorizar = true;
+				}
+				else {
+					foreach ($this->_config->ip_master["url"] as $ipMaster) {
+						if ($ip == $ipMaster) {
+							$autorizar = true;
+						}
+					}
+				}
+				unset($data->ip);
+				return $autorizar ? $data : null;
+			}
+			return null;
 		}
 		catch (\PDOException $e) {
 			$db = null;
@@ -77,22 +91,35 @@ class LoginService
 			die();
 		}
 	}
-	public function LoginCajero(string $sku, int $id_tienda, string $ip) : Empleado | null
+	public function LoginCajero(string $sku, int $id_tienda, string $ip) : EmpleadoDTO | null
 	{
 		try
 		{
 			$db = MySql::Connect();
-			$q = "SELECT e.* FROM empleados e INNER JOIN tienda t ON e.id_tienda = t.id
-				  WHERE e.cod = :cod AND (t.ip = :ip OR :ip = :ip_master) AND t.id = :id_tienda AND e.estado = 1";
+			$q = "SELECT e.*, t.ip FROM empleados e INNER JOIN tienda t ON e.id_tienda = t.id
+				WHERE e.cod = :cod AND t.id = :id_tienda AND e.estado = 1";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(":cod", $sku, PDO::PARAM_STR);
-			$stmt->bindParam(":ip", $ip, PDO::PARAM_STR);
-            $stmt->bindParam(":ip_master", $this->_config->ip_master, PDO::PARAM_STR);
 			$stmt->bindParam(":id_tienda", $id_tienda, PDO::PARAM_INT);
 			$stmt->execute();
-			$data = $stmt->fetchObject(Empleado::class);
+			$data = $stmt->fetchObject(EmpleadoDTO::class);
 			$db = null;
-			return $data ? $data : null;
+			if ($data) {
+				$autorizar = false;
+				if ($ip == $data->ip) {
+					$autorizar = true;
+				}
+				else {
+					foreach ($this->_config->ip_master["url"] as $ipMaster) {
+						if ($ip == $ipMaster) {
+							$autorizar = true;
+						}
+					}
+				}
+				unset($data->ip);
+				return $autorizar ? $data : null;
+			}
+			return null;
 		}
 		catch (\PDOException $e) {
 			$db = null;

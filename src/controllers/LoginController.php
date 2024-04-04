@@ -78,7 +78,7 @@ class LoginController
 			$ip = $request->getServerParams()['REMOTE_ADDR'];
 			$tienda = $this->_loginService->LoginVenta($id_tienda, $nro_caja, $ip, $sku_jefeTienda);
 			if (!$tienda) {
-				$response->getBody()->write("No se encontró tienda o se encuentra fuera de ella");
+				$response->getBody()->write("No se pudo autenticar. Verifica los datos ingresados y asegúrate de estar en la tienda.");
 				return $response->withStatus(404);
 			}
 			$caja = new Caja();
@@ -119,7 +119,7 @@ class LoginController
 
 			$data = $this->_loginService->LoginCajero($sku, $id_tienda, $ip);
 			if (!$data) {
-				$response->getBody()->write("No se encontró cajero");
+				$response->getBody()->write("No se pudo autenticar. Verifica el código ingresado y asegúrate de estar en la tienda.");
 				return $response->withStatus(404);
 			}
 			$nro_caja = $this->getNroCaja($request);
