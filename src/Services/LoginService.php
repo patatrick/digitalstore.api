@@ -30,7 +30,7 @@ class LoginService
 				return null;
 			}
 
-			$q = "  SELECT t.id, t.nombre, ut.id_rol, t.ip, t.cant_cajas t.giro FROM usuarios_tienda ut
+			$q = "  SELECT t.id, t.nombre, ut.id_rol, t.ip, t.cant_cajas, t.giro FROM usuarios_tienda ut
 					INNER JOIN tienda t ON ut.id_tienda = t.id
 					WHERE ut.id_usuario = ?
 					AND ( ut.id_rol = 'A' OR ut.id_rol = 'J' )
@@ -58,7 +58,7 @@ class LoginService
 		try
 		{
 			$db = MySql::Connect();
-			$q = "SELECT * FROM tienda t
+			$q = "SELECT t.* FROM tienda t
 			INNER JOIN empleados e ON e.id_tienda = t.id
 			WHERE t.id = :id_tienda AND e.cod = :sku AND :nro_caja <= t.cant_cajas AND e.id_rol <> 'C'";
 			$stmt = $db->prepare($q);
