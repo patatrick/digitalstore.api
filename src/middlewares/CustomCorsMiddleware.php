@@ -13,7 +13,7 @@ class CustomCorsMiddleware
     {
         $config = new Config();
         $corsMiddleware = new CorsMiddleware([
-            "origin" => $config->cors['url'],
+            "origin" => (array) $config->cors['url'],
             "methods" => ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "headers.allow" => ["Authorization", "Content-Type"],
             "headers.expose" => [],

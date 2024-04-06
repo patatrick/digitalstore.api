@@ -73,7 +73,7 @@ class LoginService
 					$autorizar = true;
 				}
 				else {
-					foreach ($this->_config->ip_master["url"] as $ipMaster) {
+					foreach ((array) $this->_config->ip_master["url"] as $ipMaster) {
 						if ($ip == $ipMaster) {
 							$autorizar = true;
 						}
@@ -110,7 +110,7 @@ class LoginService
 					$autorizar = true;
 				}
 				else {
-					foreach ($this->_config->ip_master["url"] as $ipMaster) {
+					foreach ((array) $this->_config->ip_master["url"] as $ipMaster) {
 						if ($ip == $ipMaster) {
 							$autorizar = true;
 						}
