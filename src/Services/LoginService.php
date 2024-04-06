@@ -3,6 +3,7 @@ namespace App\Services;
 use App\Config;
 use App\Models\Empleado;
 use App\Models\EmpleadoDTO;
+use App\Models\Tienda;
 use App\Models\TiendaDTO;
 use App\Models\Usuario;
 use App\Models\UsuarioDTO;
@@ -29,7 +30,7 @@ class LoginService
 				return null;
 			}
 
-			$q = "  SELECT t.id, t.nombre, ut.id_rol, t.ip, t.cant_cajas FROM usuarios_tienda ut
+			$q = "  SELECT t.id, t.nombre, ut.id_rol, t.ip, t.cant_cajas t.giro FROM usuarios_tienda ut
 					INNER JOIN tienda t ON ut.id_tienda = t.id
 					WHERE ut.id_usuario = ?
 					AND ( ut.id_rol = 'A' OR ut.id_rol = 'J' )
@@ -52,12 +53,12 @@ class LoginService
 			die();
 		}
 	}
-	public function LoginVenta(int $id_tienda, int $nro_caja, string $ip, string $sku_jefeTienda) : object | null
+	public function LoginVenta(int $id_tienda, int $nro_caja, string $ip, string $sku_jefeTienda) : Tienda | null
 	{
 		try
 		{
 			$db = MySql::Connect();
-			$q = "SELECT t.id, t.nombre, t.cant_cajas, t.ip FROM tienda t
+			$q = "SELECT * FROM tienda t
 			INNER JOIN empleados e ON e.id_tienda = t.id
 			WHERE t.id = :id_tienda AND e.cod = :sku AND :nro_caja <= t.cant_cajas AND e.id_rol <> 'C'";
 			$stmt = $db->prepare($q);
@@ -65,7 +66,7 @@ class LoginService
 			$stmt->bindParam(":sku", $sku_jefeTienda, PDO::PARAM_STR);
 			$stmt->bindParam(":nro_caja", $nro_caja, PDO::PARAM_INT);
 			$stmt->execute();
-			$data = $stmt->fetch(PDO::FETCH_OBJ);
+			$data = $stmt->fetchObject(Tienda::class);
 			$db = null;
 			if ($data) {
 				$autorizar = false;
