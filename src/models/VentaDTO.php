@@ -6,6 +6,7 @@ class VentaDTO
 	public string | null $ingreso = null;
 	public int $total = 0;
 	public int | null $nro_redbank = null;
+	public int $nro_boleta = 0;
 	public string $ci_vendedor = "";
     public string $sku_caja = "";
     /** @param Detalle[] $detalles */

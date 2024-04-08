@@ -18,12 +18,13 @@ class VentaService
 		{
 			$db = MySql::Connect();
 			$db->beginTransaction();
-			$q = "INSERT INTO ventas(total, nro_redbank, ci_vendedor, sku_caja) VALUES(?, ?, ?, ?)";
+			$q = "INSERT INTO ventas(total, nro_redbank, ci_vendedor, sku_caja, nro_boleta) VALUES(?, ?, ?, ?, ?)";
 			$stmt = $db->prepare($q);
 			$stmt->bindParam(1, $ventaDTO->total , PDO::PARAM_INT);
 			$stmt->bindParam(2, $ventaDTO->nro_redbank, PDO::PARAM_INT);
 			$stmt->bindParam(3, $ventaDTO->ci_vendedor, PDO::PARAM_STR);
 			$stmt->bindParam(4, $ventaDTO->sku_caja, PDO::PARAM_STR);
+			$stmt->bindParam(5, $ventaDTO->nro_boleta, PDO::PARAM_INT);
 			$stmt->execute();
 			$id_venta = (int) $db->lastInsertId();
 			if ($id_venta) {

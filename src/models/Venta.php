@@ -8,4 +8,5 @@ class Venta
 	public int | null $nro_redbank = null;
 	public int $id_vendedor = 0;
 	public int $id_caja = 0;
+    public int $nro_boleta = 0;
 }
