@@ -27,7 +27,7 @@ class EmpleadoController
 			
 			$generator = new BarcodeGeneratorSVG();
 			foreach ($data as $key => $value) {
-				$cod = $value->cod;
+                $cod = (int) substr($value->cod, 0, strlen($value->cod) - 1);
 				$barcode = $generator->getBarcode($cod, $generator::TYPE_EAN_13, 3, 100);
 				$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
 				$barcodeWithName = <<<HTML
@@ -63,7 +63,7 @@ class EmpleadoController
 			];
 			$generator = new BarcodeGeneratorSVG();
 			foreach ($empleado as $key => $value) {
-				$cod = (int) $value->cod;
+				$cod = (int) substr($value->cod, 0, strlen($value->cod) - 1);
 				$barcode = $generator->getBarcode($cod, $generator::TYPE_EAN_13, 3, 100);
 				$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
 				$barcodeWithName = <<<HTML
@@ -168,7 +168,8 @@ class EmpleadoController
 				return $response->withStatus(422);
 			}
 			$generator = new BarcodeGeneratorSVG();
-			$barcode = $generator->getBarcode((int) $empleado->cod, $generator::TYPE_EAN_13, 3, 100);
+            $cod = (int) substr($empleado->cod, 0, strlen($empleado->cod) - 1);
+			$barcode = $generator->getBarcode($cod, $generator::TYPE_EAN_13, 3, 100);
 			$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
 			$barcodeWithName = <<<HTML
 				<div style="display: flex;flex-direction: column; width: fit-content;text-align: center;">
@@ -231,7 +232,8 @@ class EmpleadoController
 				return $response->withStatus(422);
 			}
 			$generator = new BarcodeGeneratorSVG();
-			$barcode = $generator->getBarcode($empleado->cod, $generator::TYPE_EAN_13, 3, 100);
+            $cod = (int) substr($empleado->cod, 0, strlen($empleado->cod) - 1);
+			$barcode = $generator->getBarcode($cod, $generator::TYPE_EAN_13, 3, 100);
 			$barcode = str_replace('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">', "", $barcode);
 			$barcodeWithName = <<<HTML
 				<div style="display: flex;flex-direction: column; width: fit-content;text-align: center;">
