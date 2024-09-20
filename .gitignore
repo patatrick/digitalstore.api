@@ -1,2 +1,5 @@
 web.config
 web.production.config
+info.php
+.vscode
+vendor/*

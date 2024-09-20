@@ -8,7 +8,7 @@ use App\Traits\TokenTrait;
 
 use App\Services\AdministradorService;
 
-class AdministradirController
+class AdministradorController
 {
 	use TokenTrait;
 	private readonly AdministradorService $_administradirService;
